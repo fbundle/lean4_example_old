@@ -1,3 +1,7 @@
+
+import LLMlean
+
+
 section StrongInduction
 
 def is_prime (n: Nat): Prop := 2 ≤ n ∧ ∀ (m: Nat), m ∣ n → ¬ (2 ≤ m ∧ m < n)
@@ -53,39 +57,57 @@ theorem prime_factor: ∀ (n: Nat), 2 ≤ n → ∃ (m: Nat), is_prime m ∧ m �
         let l_divides_n := divide_trans l m n l_divides_m m_divides_n
         exact Exists.intro l (And.intro l_is_prime l_divides_n)
 
-theorem prime_factor_wt : ∀ n : Nat, 2 ≤ n → ∃ m, is_prime m ∧ m ∣ n := by
-  intro n
-  induction n using Nat.strongRecOn with
-  | ind n ih =>
-    intro hn
-    by_cases hp : is_prime n
-    case pos => -- hp: is_prime n
-      exists n
-      constructor
-      case left =>
-        exact hp
-      case right =>
-        exists 1
-        simp
-    case neg => -- hp: ¬ is_prime n
-      simp [is_prime] at hp
-      let hx := hp hn
-      rcases hx with ⟨w, hw⟩
-      rcases hw with ⟨w_div_n, w_bw_2_n⟩
-      rcases w_bw_2_n with ⟨_2_le_w , w_lt_n⟩
-      let ehx := ih w w_lt_n _2_le_w
-      rcases ehx with ⟨x , hx⟩
-      exists x
-      rcases hx with ⟨x_is_prime, x_div_w⟩
-      constructor
-      case left => exact x_is_prime
-      case right =>
-        rcases w_div_n with ⟨n_over_w, h1⟩
-        rcases x_div_w with ⟨w_over_x, h2⟩
-        exists (w_over_x * n_over_w)
-        rw [h1, h2, Nat.mul_assoc]
-
 
 #print prime_factor
+
+
+namespace v2
+
+-- import LLMlean
+-- llmstep for one step
+-- llmqed for all steps
+
+
+def div (a b : Nat) := ∃ (k: Nat), a = k * b
+
+def is_prime (a: Nat): Prop := ¬ (∃ (k: Nat), 2 ≤ k ∧ k < a ∧ div k a)
+
+def div_rfl: ∀ (a: Nat), div a a := by
+  intro a
+  exists 1
+  rw [Nat.one_mul]
+
+def div_trans: ∀ (a b c: Nat), div a b → div b c → div a c := by
+  intro a b c
+  intro a_div_b b_div_c
+  rcases a_div_b with ⟨x, a_eq_xb⟩
+  rcases b_div_c with ⟨y, b_eq_yc⟩
+  simp [div]
+  exists x * y
+  rw [Nat.mul_assoc, a_eq_xb, b_eq_yc]
+
+def prime_factor: ∀ (a: Nat), 2 ≤ a → ∃ (k: Nat), is_prime k ∧ div k a := by
+  intros a
+  induction a using Nat.strongRecOn with
+    | ind a ha_ind =>
+      intro _2_le_a
+      by_cases h: is_prime a
+      case pos =>
+        exists a
+        constructor
+        case left => exact h
+        case right => exact (div_rfl a)
+      case neg =>
+        simp [is_prime] at h
+        rcases h with ⟨k, ⟨_2_le_k, k_lt_a, k_div_a⟩⟩
+        have hl: ∃ (l: Nat), is_prime l ∧ div l k := ha_ind k k_lt_a _2_le_k
+        rcases hl with ⟨l, ⟨l_is_prime, l_div_k⟩⟩
+        exists l
+        constructor
+        case left => exact l_is_prime
+        case right => exact (div_trans l k a l_div_k k_div_a)
+
+#print prime_factor
+end v2
 
 end StrongInduction
