@@ -53,6 +53,39 @@ theorem prime_factor: ∀ (n: Nat), 2 ≤ n → ∃ (m: Nat), is_prime m ∧ m �
         let l_divides_n := divide_trans l m n l_divides_m m_divides_n
         exact Exists.intro l (And.intro l_is_prime l_divides_n)
 
+theorem prime_factor_wt : ∀ n : Nat, 2 ≤ n → ∃ m, is_prime m ∧ m ∣ n := by
+  intro n
+  induction n using Nat.strongRecOn with
+  | ind n ih =>
+    intro hn
+    by_cases hp : is_prime n
+    case pos => -- hp: is_prime n
+      exists n
+      constructor
+      case left =>
+        exact hp
+      case right =>
+        exists 1
+        simp
+    case neg => -- hp: ¬ is_prime n
+      simp [is_prime] at hp
+      let hx := hp hn
+      rcases hx with ⟨w, hw⟩
+      rcases hw with ⟨w_div_n, w_bw_2_n⟩
+      rcases w_bw_2_n with ⟨_2_le_w , w_lt_n⟩
+      let ehx := ih w w_lt_n _2_le_w
+      rcases ehx with ⟨x , hx⟩
+      exists x
+      rcases hx with ⟨x_is_prime, x_div_w⟩
+      constructor
+      case left => exact x_is_prime
+      case right =>
+        rcases w_div_n with ⟨n_over_w, h1⟩
+        rcases x_div_w with ⟨w_over_x, h2⟩
+        exists (w_over_x * n_over_w)
+        rw [h1, h2, Nat.mul_assoc]
+
+
 #print prime_factor
 
 end StrongInduction
