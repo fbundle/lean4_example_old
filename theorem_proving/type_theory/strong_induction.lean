@@ -108,6 +108,7 @@ def prime_factor: ∀ (a: Nat), 2 ≤ a → ∃ (k: Nat), is_prime k ∧ div k a
         case right => exact (div_trans l k a l_div_k k_div_a)
 
 #print prime_factor
+
 end v2
 
 end StrongInduction
