@@ -38,7 +38,7 @@ theorem prime_factor: ∀ (n: Nat), 2 ≤ n → ∃ (m: Nat), is_prime m ∧ m �
       exact Exists.intro n (And.intro h₂ (divide_rfl n))
     else -- `h₂: ¬ is_prime n`
       let h₃ : ∃ (m: Nat), ¬(m ∣ n → ¬ (2 ≤ m ∧ m < n)) := cl_1 (cl_3 h₂ h₁)
-      obtain ⟨(m: Nat), (hm : ¬(m ∣ n → ¬(2 ≤ m ∧ m < n)))⟩ := h₃
+      let ⟨(m: Nat), (hm : ¬(m ∣ n → ¬(2 ≤ m ∧ m < n)))⟩ := h₃
       let h₄ : m ∣ n ∧ 2 ≤ m ∧ m < n := cl_2 hm
       let m_divides_n : m ∣ n := h₄.left
       let m_ge_2 : 2 ≤ m := h₄.right.left
@@ -47,7 +47,7 @@ theorem prime_factor: ∀ (n: Nat), 2 ≤ n → ∃ (m: Nat), is_prime m ∧ m �
         exact Exists.intro m (And.intro h₅ m_divides_n)
       else -- `h₅ : ¬ is_prime m`
         let h₆ : ∃ l, is_prime l ∧ l ∣ m := ih m m_lt_n m_ge_2
-        obtain ⟨(l: Nat), (hl: is_prime l ∧ l ∣ m)⟩ := h₆
+        let ⟨(l: Nat), (hl: is_prime l ∧ l ∣ m)⟩ := h₆
         let l_is_prime: is_prime l := hl.left
         let l_divides_m: l ∣ m := hl.right
         let l_divides_n := divide_trans l m n l_divides_m m_divides_n
