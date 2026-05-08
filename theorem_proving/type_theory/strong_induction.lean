@@ -61,6 +61,7 @@ theorem prime_factor: ∀ (n: Nat), 2 ≤ n → ∃ (m: Nat), is_prime m ∧ m �
 #print prime_factor
 
 
+-- with mainly tactics
 namespace v2
 
 -- import LLMlean
@@ -110,5 +111,38 @@ def prime_factor: ∀ (a: Nat), 2 ≤ a → ∃ (k: Nat), is_prime k ∧ div k a
 #print prime_factor
 
 end v2
+
+-- with Ax-Prover
+namespace v3
+
+-- import LLMlean
+-- llmstep for one step
+-- llmqed for all steps
+
+
+def div (a b : Nat) := ∃ (k: Nat), a = k * b
+
+def is_prime (a: Nat): Prop := ¬ (∃ (k: Nat), 2 ≤ k ∧ k < a ∧ div k a)
+
+def div_rfl: ∀ (a: Nat), div a a := by
+  intro a
+  exists 1
+  rw [Nat.one_mul]
+
+def div_trans: ∀ (a b c: Nat), div a b → div b c → div a c := by
+  intro a b c
+  intro a_div_b b_div_c
+  rcases a_div_b with ⟨x, a_eq_xb⟩
+  rcases b_div_c with ⟨y, b_eq_yc⟩
+  simp [div]
+  exists x * y
+  rw [Nat.mul_assoc, a_eq_xb, b_eq_yc]
+
+def prime_factor: ∀ (a: Nat), 2 ≤ a → ∃ (k: Nat), is_prime k ∧ div k a := by
+  sorry
+
+#print prime_factor
+
+end v3
 
 end StrongInduction
